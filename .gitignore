@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.uv/
+downloaded_files/
+*.parquet
+.soccerdata/
