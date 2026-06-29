@@ -76,10 +76,6 @@ Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 # Install dependencies
 uv sync
 
-# Download the Kaggle dataset and save to:
-# data/raw/results.csv
-# https://www.kaggle.com/datasets/martj42/international-football-results-from-1872-to-2017
-
 # Run the full pipeline
 uv run python main.py
 ```
