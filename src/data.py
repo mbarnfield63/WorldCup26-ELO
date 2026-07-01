@@ -70,32 +70,11 @@ def scrape_wc26_matches() -> pd.DataFrame:
         raw["home_score"] = pd.to_numeric(parsed[0].str.strip(), errors="coerce")
         raw["away_score"] = pd.to_numeric(parsed[1].str.strip(), errors="coerce")
 
-    # xG is not in the schedule; try shot events and aggregate per game
-    # ponytail: falls back to NaN so xg_xp is just skipped in viz
+    # ponytail: FBRef has no xG for this competition (checked read_schedule and
+    # read_team_match_stats(stat_type="shooting") — neither has an xg column),
+    # so xg_xp is just skipped in viz. Revisit if FBRef adds Opta xG for WC26.
     raw["home_xg"] = float("nan")
     raw["away_xg"] = float("nan")
-    try:
-        shots = fbref.read_shot_events()
-        if isinstance(shots.index, pd.MultiIndex):
-            shots = shots.reset_index()
-        shots.columns = [
-            c.lower().replace(" ", "_").replace("-", "_") for c in shots.columns
-        ]
-        xg_col = next((c for c in shots.columns if "xg" in c and "psxg" not in c), None)
-        if xg_col and "game_id" in shots.columns and "team" in shots.columns:
-            home_map = raw.set_index("game_id")["home_team"].to_dict()
-            shots["is_home"] = shots["game_id"].map(home_map) == shots["team"]
-            xg_agg = (
-                shots.groupby(["game_id", "is_home"])[xg_col]
-                .sum()
-                .unstack(fill_value=0)
-            )
-            if True in xg_agg.columns:
-                raw["home_xg"] = raw["game_id"].map(xg_agg[True])
-            if False in xg_agg.columns:
-                raw["away_xg"] = raw["game_id"].map(xg_agg[False])
-    except Exception:
-        pass
 
     # Filter to completed group stage matches
     round_col = next(

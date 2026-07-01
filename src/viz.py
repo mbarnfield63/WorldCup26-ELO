@@ -92,27 +92,30 @@ def plot_comparison(
     sorted_df = df.sort_values("elo_xp", ascending=False)
     teams = sorted_df.index.tolist()
     x = np.arange(len(teams))
-    width = 0.28
+    # ponytail: xg_xp is all-NaN while FBRef has no xG for this competition; drop that bar
+    has_xg = sorted_df["xg_xp"].notna().any()
+    width = 0.28 if has_xg else 0.35
 
     fig, ax = plt.subplots(figsize=(18, 7), dpi=100)
     ax.bar(
-        x - width,
+        x - width if has_xg else x - width / 2,
         sorted_df["elo_xp"],
         width,
         label="ELO-expected pts",
         color="#3498db",
         alpha=0.85,
     )
+    if has_xg:
+        ax.bar(
+            x,
+            sorted_df["xg_xp"],
+            width,
+            label="xG-expected pts",
+            color="#9b59b6",
+            alpha=0.85,
+        )
     ax.bar(
-        x,
-        sorted_df["xg_xp"],
-        width,
-        label="xG-expected pts",
-        color="#9b59b6",
-        alpha=0.85,
-    )
-    ax.bar(
-        x + width,
+        x + width if has_xg else x + width / 2,
         sorted_df["actual"],
         width,
         label="Actual pts",

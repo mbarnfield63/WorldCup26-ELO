@@ -101,7 +101,8 @@ def compute_xp(matches: pd.DataFrame, ratings: dict[str, float]) -> pd.DataFrame
         )
 
     df = pd.DataFrame(rows)
-    agg = df.groupby("team").sum(numeric_only=True)
+    # ponytail: min_count=1 so an all-NaN xg_xp group stays NaN instead of summing to 0
+    agg = df.groupby("team").sum(numeric_only=True, min_count=1)
 
     # Delta columns for the hero chart
     agg["vs_elo"] = agg["actual"] - agg["elo_xp"]
